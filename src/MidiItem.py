@@ -13,7 +13,8 @@ class Actions(Enum):
     PRINT_MESSAGE = 4
 
 class MidiElement():
-    def __init__(self, control_type: MidiControlType, action_type: Actions, midi_channel=1, midi_note=None, value=None):
+    def __init__(self, profile_name, control_type: MidiControlType, action_type: Actions, midi_channel=1, midi_note=None, value=None):
+        self.profile_name = profile_name
         self.control_type = control_type  # Assign control type from enum
         self.action_type = action_type
         self.midi_channel = midi_channel
@@ -28,7 +29,8 @@ class MidiElement():
 
     def describe(self):
         """Prints a description of the MIDI element."""
-        return (f"Type: {self.control_type.name}, "
+        return (f"Profile: {self.profile_name}, "
+                f"Type: {self.control_type.name}, "
                 f"Action: {self.action_type.name}, "
                 f"Channel: {self.midi_channel}, "
                 f"Note: {self.midi_note}, "

@@ -1,0 +1,12 @@
+{
+    "default": {
+        "notes": {
+            "B#9": {
+                "action": "actions.keyboard_shortcut",
+                "params": {
+                    "command_testing": "TEST"
+                }
+            }
+        }
+    }
+}
