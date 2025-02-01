@@ -1,12 +1,15 @@
 from PySide6.QtCore import QPropertyAnimation, Qt
 from PySide6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QGroupBox, QComboBox, QHBoxLayout, QLineEdit
 from src.MidiItem import Actions, MidiControlType, MidiElement
+from src.profile_dection import ProfileDetection
 class SidePanel(QWidget):
     def __init__(self, parent: QMainWindow):
         super().__init__(parent)
         self.setFixedWidth(200)  # Optional: Set a fixed width for the side panel
         self.setStyleSheet("background-color: rgb(68, 75, 82);")
         self.setGeometry(parent.width(), 0, self.minimumWidth(), parent.height())
+
+        self.profile = ProfileDetection()
 
         self.parent_widget = parent
         self.layout = QVBoxLayout(self)
@@ -41,6 +44,15 @@ class SidePanel(QWidget):
         self.midi_channel_dropdown = QComboBox(group_box)
         self.midi_channel_dropdown.addItems([str(i) for i in range(16)])
 
+        # Current Profile
+        profile_layout = QHBoxLayout()
+        profile_label = QLabel(f"Profile:")
+        self.profile_label_text = QLabel(f" ___N/A___")
+        profile_label.setFixedHeight(30)
+        self.profile_label_text.setFixedHeight(30)
+        profile_layout.addWidget(profile_label)
+        profile_layout.addWidget(self.profile_label_text)
+
         # Action Dropdown with Label
         action_layout = QHBoxLayout()
         action_label = QLabel("Action:")
@@ -73,6 +85,7 @@ class SidePanel(QWidget):
 
 
         group_box_layout.addWidget(close_widget_button)
+        group_box_layout.addLayout(profile_layout)
         group_box_layout.addLayout(control_type_layout)
         group_box_layout.addLayout(action_layout)
         group_box_layout.addLayout(midi_channel_layout)
@@ -91,8 +104,10 @@ class SidePanel(QWidget):
         self.toggle()
 
     def save(self):
-        element = MidiElement(MidiControlType[self.control_type_dropdown.currentText()], Actions[self.action_dropdown.currentText()],
+        element = MidiElement(self.profile_label_text.text(), MidiControlType[self.control_type_dropdown.currentText()], Actions[self.action_dropdown.currentText()],
                               self.midi_channel_dropdown.currentText(), self.midi_note_text.text(), self.midi_value.text())
+        
+        self.profile.save_profile(element)
         print(f"midi element: {element.describe()}")
 
     def reset(self):
