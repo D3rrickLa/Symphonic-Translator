@@ -9,6 +9,7 @@ class SidePanel(QWidget):
         self.setStyleSheet("background-color: rgb(68, 75, 82);")
         self.setGeometry(parent.width(), 0, self.minimumWidth(), parent.height())
 
+        self.non_key_id = -1
         self.profile = ProfileDetection()
 
         self.parent_widget = parent
@@ -83,12 +84,12 @@ class SidePanel(QWidget):
         self.midi_value = QLineEdit(group_box)
         self.midi_value.setPlaceholderText("Enter value here")
 
-
         group_box_layout.addWidget(close_widget_button)
         group_box_layout.addLayout(profile_layout)
         group_box_layout.addLayout(control_type_layout)
         group_box_layout.addLayout(action_layout)
         group_box_layout.addLayout(midi_channel_layout)
+        group_box_layout.addWidget(self.non_note_key)
         group_box_layout.addWidget(self.midi_note_text)
         group_box_layout.addWidget(self.midi_value)
         group_box_layout.addLayout(save_layout)
@@ -99,6 +100,9 @@ class SidePanel(QWidget):
         self.animation = QPropertyAnimation(self, b"geometry")
         self.animation.setDuration(250)  # Animation duration in milliseconds
         self.side_widget_visible = False 
+    
+    def set_non_key(self, id):
+            self.non_key_id = id
 
     def close(self):
         self.toggle()
@@ -117,7 +121,6 @@ class SidePanel(QWidget):
         self.midi_note_text.clear()                  
         self.midi_value.clear()       
         self.save()               
-        
 
     def toggle(self):        
         if self.animation.state() == QPropertyAnimation.Running:

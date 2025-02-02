@@ -7,6 +7,7 @@ class FaderWidget(QWidget):
     def __init__(self, parent=None, side_panel: SidePanel = None, side_id = None):
         super().__init__(parent)
         self.setFixedSize(50, 200)
+        self._parent = parent
 
         self.layout = QVBoxLayout(self)
         slider = QSlider(Qt.Vertical, self)
@@ -36,8 +37,10 @@ class FaderWidget(QWidget):
 
     def toggle_side_panel(self):
         """Toggle the side panel."""
+        self.side_panel.non_key_id = self.slider_id
         self.side_panel.control_type_dropdown.setCurrentIndex(1)
-        self.side_panel.midi_note_text.setText(f"{self.slider_id}")
+        self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
+        self.side_panel.midi_note_text.setText(f"{self.slider_id} Amongus")
         self.side_panel.toggle()
 
     def mousePressEvent(self, event):

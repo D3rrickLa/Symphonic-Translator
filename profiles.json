@@ -1,10 +1,18 @@
 {
     "default": {
-        "notes": {
-            "B#9": {
-                "action": "actions.keyboard_shortcut",
+        "KEY": {
+            "G11": {
+                "action": "actions.print_message",
                 "params": {
-                    "command_testing": "TEST"
+                    "message": ""
+                }
+            }
+        },
+        "KNOB": {
+            "7": {
+                "action": "actions.none",
+                "params": {
+                    "none": ""
                 }
             }
         }

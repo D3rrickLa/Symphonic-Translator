@@ -55,7 +55,6 @@ class PianoWidget(QWidget):
         return piano_key_btn
     
     def key_pressed(self, key_name, key_index):
-        print(f"{key_name} {key_index} pressed")
         self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
         self.side_panel.control_type_dropdown.setCurrentIndex(0)
         self.side_panel.midi_note_text.setText(f"{key_name}{key_index}")
