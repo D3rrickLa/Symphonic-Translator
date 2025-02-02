@@ -1,6 +1,7 @@
 import json
+import os
 import pygetwindow as gw
-from src.MidiItem import MidiElement, MidiControlType
+from src.MidiItem import MidiElement, MidiControlType, Actions
 class ProfileDetection():
     def __init__(self):
         self.default_profile = {
@@ -48,16 +49,43 @@ class ProfileDetection():
     
     def save_profile(self, item: MidiElement):
         profile_data = {}
-        profile_data[item.profile_name] = {}
-        
-        profile_data[item.profile_name]["notes"] = {}
-        if item.control_type == MidiControlType.KEY:
-            profile_data[item.profile_name]["notes"][item.midi_note] = {
-                "action" : str(item.action_type).lower(),
-                "params" : {"command_testing" : item.get_value()}
-            }
+
+        # Load existing data if the file exists
+        if os.path.exists("profiles.json"):
+            with open("profiles.json", "r") as file:
+                try:
+                    profile_data = json.load(file)
+                except json.JSONDecodeError:
+                    profile_data = {}  # Handle case where file is empty or corrupted
+
+        if item.profile_name not in profile_data:
+            profile_data[item.profile_name] = {}
+
+        if item.control_type.name not in profile_data[item.profile_name]:
+            profile_data[item.profile_name][item.control_type.name] = {}
+
+        # Add or update the note data
+        profile_data[item.profile_name][item.control_type.name][item.midi_note] = {
+            "action": str(item.action_type).lower(),
+            "params": {self.get_param_type(item.action_type): item.get_value()}
+        }
+
+        # Write updated data back to the file
         with open("profiles.json", "w") as file:
             json.dump(profile_data, file, indent=4)
+
+    def get_param_type(self, type: Actions):
+        match(type):
+            case Actions.RUN_COMMAND:
+                return "command"
+            case Actions.KEYBOARD_SHORTCUT:
+                return "shortcut"
+            case Actions.RUN_SCRIPT:
+                return "script"
+            case Actions.PRINT_MESSAGE:
+                return "message"
+            case _:
+                return "none"
 
     def run_app(self):
         loaded_profiles = self.load_profiles()

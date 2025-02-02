@@ -10,7 +10,8 @@ class KnobWidget(QWidget):
     def __init__(self, min_value=0, max_value=100, parent=None, side_panel: SidePanel=None, knob_id = None):
         super().__init__(parent)
         self.setMinimumSize(80, 80)    
-        
+        self._parent = parent
+
         self.min_value = min_value
         self.max_value = max_value
         self.value = (self.max_value + self.min_value) // 2  # Default to midpoint value
@@ -73,6 +74,8 @@ class KnobWidget(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.is_in_knob_area(event.pos()):
+                self.side_panel.enable_non_key()
                 self.side_panel.control_type_dropdown.setCurrentIndex(2)
-                self.side_panel.midi_note_text.setText(f"{self.knob_id}") 
+                self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
+                self.side_panel.midi_note_text.setText(f"{self.knob_id} Amongus") 
                 self.side_panel.toggle()   
