@@ -89,7 +89,6 @@ class SidePanel(QWidget):
         group_box_layout.addLayout(control_type_layout)
         group_box_layout.addLayout(action_layout)
         group_box_layout.addLayout(midi_channel_layout)
-        group_box_layout.addWidget(self.non_note_key)
         group_box_layout.addWidget(self.midi_note_text)
         group_box_layout.addWidget(self.midi_value)
         group_box_layout.addLayout(save_layout)
@@ -111,7 +110,11 @@ class SidePanel(QWidget):
         element = MidiElement(self.profile_label_text.text(), MidiControlType[self.control_type_dropdown.currentText()], Actions[self.action_dropdown.currentText()],
                               self.midi_channel_dropdown.currentText(), self.midi_note_text.text(), self.midi_value.text())
         
-        self.profile.save_profile(element)
+        if MidiControlType[self.control_type_dropdown.currentText()] == MidiControlType.FADER or MidiControlType[self.control_type_dropdown.currentText()] == MidiControlType.KNOB:
+            self.profile.save_profile_non(element, self.non_key_id)
+        else:
+            self.profile.save_profile(element)
+        
         print(f"midi element: {element.describe()}")
 
     def reset(self):
