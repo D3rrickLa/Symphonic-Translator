@@ -37,10 +37,10 @@ class FaderWidget(QWidget):
 
     def toggle_side_panel(self):
         """Toggle the side panel."""
-        self.side_panel.non_key_id = self.slider_id
+        self.side_panel.set_non_key(self.slider_id)
         self.side_panel.control_type_dropdown.setCurrentIndex(1)
         self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
-        self.side_panel.midi_note_text.setText(f"{self.slider_id} Amongus")
+        self.side_panel.midi_note_text.setText(f"{self.slider_id}")
         self.side_panel.toggle()
 
     def mousePressEvent(self, event):

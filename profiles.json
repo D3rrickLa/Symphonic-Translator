@@ -1,18 +1,45 @@
 {
     "default": {
-        "KEY": {
-            "G11": {
-                "action": "actions.print_message",
+        "notes": {
+            "69": {
+                "action": "run_command",
                 "params": {
-                    "message": ""
+                    "command": "start notepad"
+                }
+            },
+            "70": {
+                "action": "run_command",
+                "params": {
+                    "command": "start chrome"
+                }
+            }
+        },
+        "cc": {
+            "1": {
+                "action": "none"
+            }
+        },
+        "pw": {
+            "1": {
+                "action": "print_message",
+                "params": {
+                    "message": "Pitch wheel moved!"
                 }
             }
         },
         "KNOB": {
-            "7": {
-                "action": "actions.none",
+            "0": {
+                "action": "actions.print_message",
                 "params": {
-                    "none": ""
+                    "cc_control_id": "11",
+                    "message": "Print"
+                }
+            },
+            "2": {
+                "action": "actions.print_message",
+                "params": {
+                    "cc_control_id": "11",
+                    "message": "Hello World"
                 }
             }
         }

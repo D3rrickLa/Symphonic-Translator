@@ -74,6 +74,53 @@ class ProfileDetection():
         with open("profiles.json", "w") as file:
             json.dump(profile_data, file, indent=4)
 
+    def save_profile_non(self, item: MidiElement, id):
+        """For the knobs and faders, will use this so that the assign knob/fader when click would load the right info"""
+        profile_data = {}
+
+        # Load existing data if the file exists
+        if os.path.exists("profiles.json"):
+            with open("profiles.json", "r") as file:
+                try:
+                    profile_data = json.load(file)
+                except json.JSONDecodeError:
+                    profile_data = {}  # Handle case where file is empty or corrupted
+
+        if item.profile_name not in profile_data:
+            profile_data[item.profile_name] = {}
+
+        if item.control_type.name not in profile_data[item.profile_name]:
+            profile_data[item.profile_name][item.control_type.name] = {}
+
+        # Add or update the note data
+        profile_data[item.profile_name][item.control_type.name][str(id)] = {
+            "action": str(item.action_type).lower(),
+            "params": {
+                "cc_control_id": item.midi_note,
+                self.get_param_type(item.action_type): item.get_value()        
+            },
+            
+        }
+
+        # Write updated data back to the file
+        with open("profiles.json", "w") as file:
+            json.dump(profile_data, file, indent=4)
+            pass
+
+    def load_key_profile(self, id):
+        profile_data = {}
+        with open("profiles.json", "r") as file:
+            try:
+                profile_data = json.load(file)
+            except json.JSONDecodeError:
+                profile_data = {}  # Handle case where file is empty or corrupted
+        try:
+            knob_key = f"{id}"
+            return profile_data["default"]["KNOB"].get(knob_key, None)
+        except Exception as e:
+            print(e)
+            return None
+
     def get_param_type(self, type: Actions):
         match(type):
             case Actions.RUN_COMMAND:
