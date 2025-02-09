@@ -179,4 +179,4 @@ cython_debug/
 
 
 # JSON Profile
-/profiles.json
+profiles.json
