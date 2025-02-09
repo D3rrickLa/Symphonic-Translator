@@ -66,7 +66,7 @@ class ProfileDetection():
 
         # Add or update the note data
         profile_data[item.profile_name][item.control_type.name][item.midi_note] = {
-            "action": str(item.action_type).lower(),
+            "action": str(item.action_type.value),
             "params": {self.get_param_type(item.action_type): item.get_value()}
         }
 
@@ -94,7 +94,7 @@ class ProfileDetection():
 
         # Add or update the note data
         profile_data[item.profile_name][item.control_type.name][str(id)] = {
-            "action": str(item.action_type).lower(),
+            "action": str(item.action_type.value).lower(),
             "params": {
                 "cc_control_id": item.midi_note,
                 self.get_param_type(item.action_type): item.get_value()        

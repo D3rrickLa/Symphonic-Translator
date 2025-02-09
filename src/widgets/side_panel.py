@@ -165,3 +165,4 @@ class SidePanel(QWidget):
             )
 
         super().resizeEvent(event)
+
