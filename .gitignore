@@ -176,3 +176,7 @@ cython_debug/
 
 # Scripts folder for running Virtual Env
 /Scripts
+
+
+# JSON Profile
+/profiles.json

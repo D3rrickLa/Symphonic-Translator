@@ -32,34 +32,42 @@ class PianoWidget(QWidget):
         black_key_width = self.key_width * 0.6
         black_key_height = self.height() * 0.6 
         black_key_positions = [0, 1, 3, 4, 5]
+        white_numbers = [0, 2, 4, 5, 7, 9, 11]
+        black_numbers = [1, 3, 6, 8, 10]
 
         self.white_key_names = ["C", "D", "E", "F", "G", "A", "B"]
         self.white_keys = []
         self.black_keys = []
 
+    
         for octave in range(octaves):
-            for i in range(white_keys_num):
-                key_name = self.white_key_names[i]
-                self.white_keys.append(self.create_piano_key(self.key_width, self.height(), octave * white_keys_num + i, "white", key_name))
+            base_midi = octave * 12  # MIDI base for the current octave
+    
+             # Create white keys
+            for i, note_offset in enumerate(white_numbers):
+                midi_value = base_midi + note_offset
+                key_name = self.white_key_names[i] + str(octave)  # C4, D4, etc.
+                self.white_keys.append(self.create_piano_key(self.key_width, self.height(), midi_value, "white", key_name))
 
-            for key_idx, _ in enumerate(black_key_positions):
-                key_name = self.white_key_names[i] + "#"
-                btn = self.create_piano_key(black_key_width, black_key_height, octave * len(black_key_positions) + key_idx, "black", key_name)
+            # Create black keys
+            for key_idx, note_offset in enumerate(black_numbers):
+                midi_value = base_midi + note_offset
+                key_name = self.white_key_names[black_key_positions[key_idx]] + "#" + str(octave)
+                btn = self.create_piano_key(black_key_width, black_key_height, midi_value, "black", key_name)
                 self.black_keys.append(btn)
  
     def create_piano_key(self, width, height, idx, color, key_name):
         piano_key_btn = QPushButton(self)
         piano_key_btn.setStyleSheet(f"background-color: {color}; border: 1px solid black;")
         piano_key_btn.setFixedSize(width, height)
-        piano_key_btn.clicked.connect(lambda checked, idx = idx: self.key_pressed(key_name, idx))
+        piano_key_btn.clicked.connect(lambda _, idx = idx: self.key_pressed(key_name, idx))
         return piano_key_btn
     
     def key_pressed(self, key_name, key_index):
         self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
         self.side_panel.control_type_dropdown.setCurrentIndex(0)
-        self.side_panel.midi_note_text.setText(f"{key_name}{key_index}")
+        self.side_panel.midi_note_text.setText(f"{key_index}")
         self.side_panel.toggle()   
-
 
     def resizeEvent(self, event):
         """Handle resizing to maintain static key positions."""
