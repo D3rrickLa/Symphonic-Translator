@@ -76,17 +76,17 @@ class KnobWidget(QWidget):
         if event.button() == Qt.LeftButton:
             if self.is_in_knob_area(event.pos()):
                 knob_data = ProfileDetection()
-                _data = knob_data.load_key_profile(self.knob_id)
+                _data = knob_data.load_key_profile(self.knob_id, f"{self._parent.profile_dropdown.currentText()}", "KNOB")
                 if _data is None:
                     self.side_panel.set_non_key(self.knob_id)
                     self.side_panel.control_type_dropdown.setCurrentIndex(2)
                     self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
                     self.side_panel.midi_note_text.setText(f"{self.knob_id}") 
+                    self.side_panel.midi_value.setText("") 
                 else:
                     self.side_panel.set_non_key(self.knob_id)
                     self.side_panel.control_type_dropdown.setCurrentIndex(2)
                     self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
-
                     params = _data.get("params", {})
 
                     # Get cc_control_id (default to empty string if missing)

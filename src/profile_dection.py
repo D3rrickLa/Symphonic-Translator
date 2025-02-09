@@ -107,7 +107,7 @@ class ProfileDetection():
             json.dump(profile_data, file, indent=4)
             pass
 
-    def load_key_profile(self, id):
+    def load_key_profile(self, id, profile, type):
         profile_data = {}
         with open("profiles.json", "r") as file:
             try:
@@ -115,8 +115,8 @@ class ProfileDetection():
             except json.JSONDecodeError:
                 profile_data = {}  # Handle case where file is empty or corrupted
         try:
-            knob_key = f"{id}"
-            return profile_data["default"]["KNOB"].get(knob_key, None)
+            _key = f"{id}"
+            return profile_data[str(profile)][type].get(_key, None)
         except Exception as e:
             print(e)
             return None
