@@ -80,6 +80,7 @@ class KnobWidget(QWidget):
                 if _data is None:
                     self.side_panel.set_non_key(self.knob_id)
                     self.side_panel.control_type_dropdown.setCurrentIndex(2)
+                    self.side_panel.action_dropdown.setCurrentIndex(0)
                     self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
                     self.side_panel.midi_note_text.setText(f"{self.knob_id}") 
                     self.side_panel.midi_value.setText("") 
@@ -87,6 +88,10 @@ class KnobWidget(QWidget):
                     self.side_panel.set_non_key(self.knob_id)
                     self.side_panel.control_type_dropdown.setCurrentIndex(2)
                     self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
+                    
+                    action = _data.get("action", {})
+                    self.side_panel.action_dropdown.setCurrentIndex(int(action))
+                    
                     params = _data.get("params", {})
 
                     # Get cc_control_id (default to empty string if missing)

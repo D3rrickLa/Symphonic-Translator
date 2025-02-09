@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QGridLayout
 )
 from side_panel import SidePanel
-
+from src.profile_dection import ProfileDetection
 class PianoWidget(QWidget):
     def __init__(self, parent: QMainWindow = None, side_panel: SidePanel = None, octaves = 3):
         super().__init__(parent)
@@ -28,7 +28,6 @@ class PianoWidget(QWidget):
 
     def create_piano(self, octaves: int = 1):
 
-        white_keys_num = 7
         black_key_width = self.key_width * 0.6
         black_key_height = self.height() * 0.6 
         black_key_positions = [0, 1, 3, 4, 5]
@@ -63,10 +62,29 @@ class PianoWidget(QWidget):
         piano_key_btn.clicked.connect(lambda _, idx = idx: self.key_pressed(key_name, idx))
         return piano_key_btn
     
+    # toggles the side panel
     def key_pressed(self, key_name, key_index):
-        self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
-        self.side_panel.control_type_dropdown.setCurrentIndex(0)
-        self.side_panel.midi_note_text.setText(f"{key_index}")
+        key_data = ProfileDetection()
+        _data = key_data.load_key_profile(key_index, f"{self._parent.profile_dropdown.currentText()}", "KEY")
+        if _data is None:
+            self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
+            self.side_panel.control_type_dropdown.setCurrentIndex(0)
+            self.side_panel.action_dropdown.setCurrentIndex(0)
+            self.side_panel.midi_note_text.setText(f"{key_index}")
+            self.side_panel.midi_value.setText("") 
+        else:
+            self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
+            self.side_panel.control_type_dropdown.setCurrentIndex(0)
+            self.side_panel.midi_note_text.setText(f"{key_index}")
+
+            action = _data.get("action", {})
+            self.side_panel.action_dropdown.setCurrentIndex(int(action))
+
+            params = _data.get("params", {})
+            if params:
+                _, value = next(iter(params.items()))
+                self.side_panel.midi_value.setText(value)
+
         self.side_panel.toggle()   
 
     def resizeEvent(self, event):

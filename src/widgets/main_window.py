@@ -1,8 +1,9 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QSizePolicy, QHBoxLayout, QComboBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QSizePolicy, QHBoxLayout, QComboBox, QPushButton
 from side_panel import SidePanel
 from knob_widget import KnobWidget
 from fader_widget import FaderWidget
 from piano_widget import PianoWidget
+from add_profile_widget import AddProfileWidget
 from src.profile_dection import ProfileDetection
 
 class MainWindow(QMainWindow):
@@ -36,6 +37,9 @@ class MainWindow(QMainWindow):
         self.profile_dropdown = QComboBox(self)
         self.profile_dropdown.addItems([i for i in profiles.run_app().keys()])
 
+        self.button = QPushButton("Add New Profile")
+        self.button.clicked.connect(self.open_add_window)
+
         self.side_panel = SidePanel(self)
         self.side_panel.setMinimumWidth(300)
 
@@ -43,9 +47,15 @@ class MainWindow(QMainWindow):
         self.layout.addStretch()  # Top stretch
         piano_layout = self.build_controller()
         self.layout.addWidget(self.profile_dropdown)
+        self.layout.addWidget(self.button)
         self.layout.addLayout(piano_layout)  # Add the actual piano layout
         self.layout.addStretch()  # Bottom stretch
+        self.new_window = None  # Placeholder for the second window
 
+    def open_add_window(self):
+        if self.new_window is None or not self.new_window.isVisible():
+            self.new_window = AddProfileWidget()  # No parent -> opens separately
+            self.new_window.show()
 
     def build_controller(self):
         layout = QVBoxLayout()
@@ -76,6 +86,12 @@ class MainWindow(QMainWindow):
         layout.addWidget(piano_widget)
 
         return layout
+    
+    def closeEvent(self, event):
+        if self.new_window:
+            self.new_window.close()
+        event.accept()
+        return super().closeEvent(event)
 
 def main():
     app = QApplication([])
