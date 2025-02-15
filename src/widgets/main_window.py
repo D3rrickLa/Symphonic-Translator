@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QSizePolicy, QHBoxLayout, QComboBox, QPushButton
+import json
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QSizePolicy, QHBoxLayout, QComboBox, QPushButton, QHBoxLayout, QMessageBox
 from side_panel import SidePanel
 from knob_widget import KnobWidget
 from fader_widget import FaderWidget
@@ -32,13 +33,23 @@ class MainWindow(QMainWindow):
         self.layout = QVBoxLayout(self.main_widget)
         self.layout.setContentsMargins(5, 0, 5, 0)  # Remove margins for better alignment
         
-        profiles = ProfileDetection()
+       
 
         self.profile_dropdown = QComboBox(self)
-        self.profile_dropdown.addItems([i for i in profiles.run_app().keys()])
+        self.load_profiles()
+        
 
         self.button = QPushButton("Add New Profile")
         self.button.clicked.connect(self.open_add_window)
+
+        self.del_button = QPushButton("Delete Current Profile")
+        self.del_button.clicked.connect(self.delete_profile)
+
+        self.button_layout = QHBoxLayout(self)
+        self.button_layout.addWidget(self.button)
+        self.button_layout.addWidget(self.del_button)
+
+        
 
         self.side_panel = SidePanel(self)
         self.side_panel.setMinimumWidth(300)
@@ -47,14 +58,55 @@ class MainWindow(QMainWindow):
         self.layout.addStretch()  # Top stretch
         piano_layout = self.build_controller()
         self.layout.addWidget(self.profile_dropdown)
-        self.layout.addWidget(self.button)
+        self.layout.addLayout(self.button_layout)
         self.layout.addLayout(piano_layout)  # Add the actual piano layout
         self.layout.addStretch()  # Bottom stretch
         self.new_window = None  # Placeholder for the second window
 
+    def load_profiles(self):
+        self.profile_dropdown.clear()
+        profiles = ProfileDetection()
+        self.profile_dropdown.addItems([i for i in profiles.run_app().keys()])
+
+    def delete_profile(self):
+        selected_profile = self.profile_dropdown.currentText()
+        if not selected_profile:
+            QMessageBox.warning(self, "No Selection", "Please select a profile to delete.")
+            return
+
+        # Confirm deletion
+        reply = QMessageBox.question(self, "Delete Profile",
+                                     f"Are you sure you want to delete '{selected_profile}'?",
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.No:
+            return
+
+        PROFILE_FILE = "profiles.json"
+        # Load JSON
+        try:
+            with open(PROFILE_FILE, "r") as file:
+                profiles = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            profiles = {}
+
+        # Remove profile if it exists
+        if selected_profile in profiles:
+            del profiles[selected_profile]
+
+            # Save updated JSON
+            with open(PROFILE_FILE, "w") as file:
+                json.dump(profiles, file, indent=4)
+
+            # Refresh the combo box
+            self.load_profiles()
+            QMessageBox.information(self, "Deleted", f"Profile '{selected_profile}' deleted successfully!")
+        else:
+            QMessageBox.warning(self, "Error", "Profile not found.")
+
     def open_add_window(self):
         if self.new_window is None or not self.new_window.isVisible():
             self.new_window = AddProfileWidget()  # No parent -> opens separately
+            self.new_window.profile_added.connect(self.load_profiles)
             self.new_window.show()
 
     def build_controller(self):

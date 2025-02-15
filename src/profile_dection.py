@@ -1,7 +1,7 @@
 import json
 import os
 import pygetwindow as gw
-from src.MidiItem import MidiElement, MidiControlType, Actions
+from src.MidiItem import MidiElement, Actions
 class ProfileDetection():
     def __init__(self):
         self.default_profile = {
