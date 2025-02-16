@@ -5,7 +5,7 @@ from knob_widget import KnobWidget
 from fader_widget import FaderWidget
 from piano_widget import PianoWidget
 from add_profile_widget import AddProfileWidget
-from src.profile_dection import ProfileDetection
+from src.profile_detection import ProfileDetection
 
 class MainWindow(QMainWindow):
     def __init__(self):
