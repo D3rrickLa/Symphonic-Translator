@@ -1,7 +1,8 @@
 from PySide6.QtCore import QPropertyAnimation, Qt
 from PySide6.QtWidgets import QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QGroupBox, QComboBox, QHBoxLayout, QLineEdit
 from src.MidiItem import Actions, MidiControlType, MidiElement
-from src.profile_dection import ProfileDetection
+from src.profile_detection import ProfileDetection
+
 class SidePanel(QWidget):
     def __init__(self, parent: QMainWindow):
         super().__init__(parent)

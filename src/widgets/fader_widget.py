@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QSlider, QLabel
 from PySide6.QtCore import Qt
-from src.profile_dection import ProfileDetection
+from src.profile_detection import ProfileDetection
 from side_panel import SidePanel
 
 class FaderWidget(QWidget):

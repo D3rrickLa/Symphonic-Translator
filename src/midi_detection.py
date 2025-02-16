@@ -1,6 +1,6 @@
 import mido 
 from src.profile_detection import ProfileDetection
-from MidiItem import Actions
+from src.MidiItem import Actions
 import subprocess
 from keyboard import send
 
@@ -75,5 +75,3 @@ if __name__ == "__main__":
     # selected_device = input("please enter the selected MIDI device:")
     listen_to_midi("Minilab3 MIDI 0")
 
-
-#  pyinstaller.exe --onefile .\testing\mapping.py

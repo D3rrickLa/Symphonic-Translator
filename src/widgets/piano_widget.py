@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QGridLayout
 )
 from side_panel import SidePanel
-from src.profile_dection import ProfileDetection
+from src.profile_detection import ProfileDetection
 class PianoWidget(QWidget):
     def __init__(self, parent: QMainWindow = None, side_panel: SidePanel = None, octaves = 3):
         super().__init__(parent)
