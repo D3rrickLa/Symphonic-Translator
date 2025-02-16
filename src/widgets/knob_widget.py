@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget
 from PySide6.QtCore import Qt, QPoint, QRectF, Signal
 from PySide6.QtGui import QPainter, QColor, QPen, QBrush
 import math
-from src.profile_dection import ProfileDetection
+from src.profile_detection import ProfileDetection
 from side_panel import SidePanel
 
 class KnobWidget(QWidget):
