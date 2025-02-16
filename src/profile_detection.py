@@ -6,15 +6,15 @@ class ProfileDetection():
     def __init__(self):
         self.default_profile = {
             "default": {
-                "notes": {
-                    "69": {"action": "run_command", "params": {"command": "start notepad"}},
-                    "70": {"action": "run_command", "params": {"command": "start chrome"}}
+                "KEYS": {
+                    "69": {"action": "1", "params": {"command": "start notepad"}},
+                    "70": {"action": "1", "params": {"command": "start chrome"}}
                 },
                 "cc": {
-                    "1": {"action": "none"}
+                    "1": {"action": "3"}
                 },
                 "pw": {
-                    "1": {"action": "print_message", "params": {"message": "Pitch wheel moved!"}}
+                    "1": {"action": "4", "params": {"message": "Pitch wheel moved!"}}
                 }
             } 
         }
@@ -42,11 +42,23 @@ class ProfileDetection():
 
     def get_profile(self, profiles):
         active_app = self.get_active_app()
+        
         for app, actions in profiles.items():
+
             if app in active_app:
                 return actions
-        return profiles # fallback
+        return profiles["default"] # fallback
     
+    def get_app_name_from_path(self, file_path):
+        # Get the base name (e.g., "chrome.exe" from the full path)
+        base_name = os.path.basename(file_path)
+        
+        # Remove the .exe extension (e.g., "chrome.exe" becomes "chrome")
+        app_name, _ = os.path.splitext(base_name)
+        
+        print(app_name)
+        return app_name.lower()  # Return the app name in lowercase for consistency
+
     def save_profile(self, item: MidiElement):
         profile_data = {}
 
@@ -138,3 +150,6 @@ class ProfileDetection():
         loaded_profiles = self.load_profiles()
         return self.get_profile(loaded_profiles)
 
+
+
+   

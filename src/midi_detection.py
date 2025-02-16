@@ -1,105 +1,79 @@
-import json
-import mido
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLabel, QComboBox
-from PySide6.QtCore import QThread, Signal
-# Load JSON Profile
-def load_profile():
-    with open("profiles.json", "r") as file:
-        return json.load(file)
+import mido 
+from src.profile_detection import ProfileDetection
+from MidiItem import Actions
+import subprocess
+from keyboard import send
 
-class MidiListenerThread(QThread):
-    midi_signal = Signal(str)
+def list_midi_devices():
+    print("Available MIDI Input Ports:")
+    for port in mido.get_input_names():
+        print(port)
 
-    def __init__(self, midi_device, active_profile):
-        super().__init__()
-        self.midi_device = midi_device
-        self.active_profile = active_profile
-        self.running = True
+def execute_action(action_conf):
+    if not action_conf or "action" not in action_conf:
+       print("No action configured")
+       return
+    
+    action_type = action_conf["action"]
+    parameters = action_conf.get("params", {})
 
-    def run(self):
-        try:
-            with mido.open_input(self.midi_device) as port:
-                print(f"Listening on {self.midi_device}...")
 
-                for msg in port:
-                    if not self.running:
-                        break
+    try:
+        match int(action_type):
+            case Actions.RUN_COMMAND.value:
+                command = parameters.get("RUN_COMMAND", "")
+                subprocess.run(command, shell=True) if command else print("No command provided for 'run_command'.")    
 
-                    self.midi_signal.emit(str(msg))
+            case Actions.KEYBOARD_SHORTCUT.value:
+                keys = parameters.get("KEYBOARD_SHORTCUT", "")
+                send(keys) if keys else  print("No keys provided for 'keyboard_shortcut'.")
+             
+            case Actions.RUN_SCRIPT.value:
+                script = parameters.get("RUN_SCRIPT", "")
+                subprocess.run(["python", script], shell=True) if script else print("No script provided for 'run_script'.")
+                    
+            case "print_message": # TODO get rid of this
+                message = parameters.get("PRINT_MESSAGE", "No message provided.")
+                print(message)
+            case Actions.NONE.value: # TODO get rid of this
+                print("No action assigned to this input")
+            case _:
+                print(f"Unknown action type: {action_type}")
 
-                    if self.active_profile:
-                        match msg.type:
-                            case "note_on" if msg.velocity > 0:
-                                action = self.active_profile.get("KEY", {}).get(str(msg.note))
-                                self.execute_action(action)
-                    else:
-                        print(f"MIDI Message Received: {msg}")
+    except Exception as e:
+        print(f"Error executing action: {e}")
 
-        except Exception as e:
-            print(f"MIDI Listening Error: {e}")
+def listen_to_midi(midi_device):
+    try:
+        with mido.open_input(midi_device) as port:
+            for msg in port:
+                active_profile = ProfileDetection().run_app()
+                match msg.type:
+                    case "note_on" if msg.velocity > 0:
+                        action = active_profile["KEY"].get(str(msg.note))
+                        print(action)
+                        execute_action(action)
+                       
+                        if(msg.note == 72):
+                            break
 
-    def stop(self):
-        self.running = False
-        self.quit()
-        self.wait()
+                    case "control_change":
+                        action = active_profile["cc"].get(str(msg.control))
+                        execute_action(action)
 
-class MidiListener(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("MIDI Listener")
-        self.setGeometry(100, 100, 400, 200)
-        
-        self.profile = load_profile()
-        self.active_profile = None
-        self.midi_thread = None
-        
-        self.setup_ui()
+                    case "pitchwheel":
+                        action = active_profile["pw"].get('1')
+                        execute_action(action)
+                    
+                
 
-    def setup_ui(self):
-        layout = QVBoxLayout()
-
-        self.label = QLabel("Select Profile and MIDI Device")
-        layout.addWidget(self.label)
-        
-        self.profile_selector = QComboBox()
-        self.profile_selector.addItems(self.profile.keys())
-        self.profile_selector.currentTextChanged.connect(self.set_active_profile)
-        layout.addWidget(self.profile_selector)
-        
-        self.midi_selector = QComboBox()
-        self.midi_selector.addItems(mido.get_input_names())
-        layout.addWidget(self.midi_selector)
-        
-        self.start_button = QPushButton("Start Listening")
-        self.start_button.clicked.connect(self.start_listening)
-        layout.addWidget(self.start_button)
-        
-        container = QWidget()
-        container.setLayout(layout)
-        self.setCentralWidget(container)
-
-    def set_active_profile(self, profile_name):
-        self.active_profile = self.profile[profile_name]
-
-    def start_listening(self):
-        selected_device = self.midi_selector.currentText()
-        if not selected_device:
-            print("No MIDI device selected.")
-            return
-
-        if self.midi_thread and self.midi_thread.isRunning():
-            self.midi_thread.stop()
-        
-        print("Starting MIDI listener...")
-        self.midi_thread = MidiListenerThread(selected_device, self.active_profile)
-        self.midi_thread.midi_signal.connect(self.update_gui)
-        self.midi_thread.start()
-
-    def update_gui(self, message):
-        self.label.setText(f"Received: {message}")
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
-    app = QApplication([])
-    window = MidiListener()
-    window.show()
-    app.exec()
+    list_midi_devices()
+    # selected_device = input("please enter the selected MIDI device:")
+    listen_to_midi("Minilab3 MIDI 0")
+
+
+#  pyinstaller.exe --onefile .\testing\mapping.py

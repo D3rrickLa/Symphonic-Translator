@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QLabel,
 )
 from PySide6.QtCore import Signal
-from src.profile_dection import ProfileDetection
+from src.profile_detection import ProfileDetection
 import json
 import os
 
