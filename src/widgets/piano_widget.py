@@ -1,45 +1,94 @@
 from PySide6.QtWidgets import (
     QMainWindow,
-    QWidget,
     QPushButton,
-    QGridLayout
+    QSizePolicy
 )
-from side_panel import SidePanel
-from src.profile_detection import ProfileDetection
-class PianoWidget(QWidget):
-    def __init__(self, parent: QMainWindow = None, side_panel: SidePanel = None, octaves = 3):
+from src.widgets.base_widget import BaseWidget
+from src.models.enums import MidiControlType
+
+class PianoWidget(BaseWidget):
+    def __init__(self, parent: QMainWindow, octaves = 3):
         super().__init__(parent)
-        self._parent = parent
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.setMinimumSize(600, 200)
-        layout = QGridLayout(self)
-        layout.setSpacing(0)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        self.layout = layout
-        self.piano_octaves = octaves
-        self.key_width = 55        
         
-        self.create_piano(octaves=self.piano_octaves)
-        self.resize_piano()
+        self._parent = parent
+        self._piano_octaves = octaves
+        self._key_width = 55
+        self._white_keys = []
+        self._black_keys = []
+        self._white_key_names = ["C", "D", "E", "F", "G", "A", "B"]
 
-        self.side_panel = side_panel  # Passing the main window (parent)
-        parent.layout.addWidget(self.side_panel)
+        self._side_panel = super().get_side_panel()
 
+        
+        # Make sure parent exists and has a layout before adding widgets
+        if self._parent and hasattr(self._parent, "_layout"):
+            self._parent.layout.addWidget(self._side_panel)  # Correct way to access layout
 
-    def create_piano(self, octaves: int = 1):
+        self.create_widget()
 
+    @property
+    def key_width(self):
+        return self._key_width
+    
+    @property
+    def piano_octaves(self):
+        return self._piano_octaves
+    
+    @property
+    def side_panel(self):
+        return self._side_panel
+    
+    @property
+    def white_keys(self):
+        return self._white_keys
+    
+    @property
+    def black_keys(self):
+        return self._black_keys
+
+    @property
+    def white_key_names(self):
+        return self._white_key_names
+
+    def toggle_side_panel(self, key_index):
+        """Toggle the visibility of the side panel."""
+        piano_key_data = super().get_profile_detection()
+        _data = piano_key_data.get_profile_by_key(key_index, f"{self._parent.profile_dropdown.currentText()}", str(MidiControlType.KEY.name))
+        
+        if _data is None:
+            self.set_key_info(key_index)
+            self.side_panel.action_dropdown[0].setCurrentIndex(0)
+            self.side_panel.midi_value.setText("") 
+        else:
+            self.set_key_info(key_index)
+
+            action = _data.get("action", {})
+            self.side_panel.action_dropdown[0].setCurrentIndex(int(action))
+
+            params = _data.get("params", {})
+            if params:
+                _, value = next(iter(params.items()))
+                self.side_panel.midi_value.setText(value)
+
+        self.side_panel.update_side_panel_visibility() 
+
+    def set_key_info(self, key_index):
+        self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
+        self.side_panel.control_type_dropdown[0].setCurrentIndex(0)
+        self.side_panel.midi_note_edit_text.setText(f"{key_index}")  
+
+    def create_widget(self):
+        """Create and add widgets to the layout."""
         black_key_width = self.key_width * 0.6
         black_key_height = self.height() * 0.6 
         black_key_positions = [0, 1, 3, 4, 5]
         white_numbers = [0, 2, 4, 5, 7, 9, 11]
         black_numbers = [1, 3, 6, 8, 10]
+  
 
-        self.white_key_names = ["C", "D", "E", "F", "G", "A", "B"]
-        self.white_keys = []
-        self.black_keys = []
-
-    
-        for octave in range(octaves):
+        for octave in range(self.piano_octaves):
             base_midi = octave * 12  # MIDI base for the current octave
     
              # Create white keys
@@ -54,48 +103,18 @@ class PianoWidget(QWidget):
                 key_name = self.white_key_names[black_key_positions[key_idx]] + "#" + str(octave)
                 btn = self.create_piano_key(black_key_width, black_key_height, midi_value, "black", key_name)
                 self.black_keys.append(btn)
- 
+    
     def create_piano_key(self, width, height, idx, color, key_name):
         piano_key_btn = QPushButton(self)
         piano_key_btn.setStyleSheet(f"background-color: {color}; border: 1px solid black;")
         piano_key_btn.setFixedSize(width, height)
-        piano_key_btn.clicked.connect(lambda _, idx = idx: self.key_pressed(key_name, idx))
+        piano_key_btn.clicked.connect(lambda _, idx = idx: self.toggle_side_panel(idx))
         return piano_key_btn
     
-    # toggles the side panel
-    def key_pressed(self, key_name, key_index):
-        key_data = ProfileDetection()
-        _data = key_data.load_key_profile(key_index, f"{self._parent.profile_dropdown.currentText()}", "KEY")
-        if _data is None:
-            self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
-            self.side_panel.control_type_dropdown.setCurrentIndex(0)
-            self.side_panel.action_dropdown.setCurrentIndex(0)
-            self.side_panel.midi_note_text.setText(f"{key_index}")
-            self.side_panel.midi_value.setText("") 
-        else:
-            self.side_panel.profile_label_text.setText(f"{self._parent.profile_dropdown.currentText()}")
-            self.side_panel.control_type_dropdown.setCurrentIndex(0)
-            self.side_panel.midi_note_text.setText(f"{key_index}")
+    def update_widget(self, value):
+        """Update widget properties or data."""
+        pass
 
-            action = _data.get("action", {})
-            self.side_panel.action_dropdown.setCurrentIndex(int(action))
-
-            params = _data.get("params", {})
-            if params:
-                _, value = next(iter(params.items()))
-                self.side_panel.midi_value.setText(value)
-
-        self.side_panel.toggle()   
-
-    def resizeEvent(self, event):
-        """Handle resizing to maintain static key positions."""
-        self.resize_piano()
-        super().resizeEvent(event)
-
-    def showEvent(self, event):
-        """Ensure proper layout when the widget is shown."""
-        self.resize_piano()
-        super().showEvent(event)
 
     def resize_piano(self):
         """Ensure the piano scales correctly on resizing."""
@@ -137,3 +156,13 @@ class PianoWidget(QWidget):
                 black_key_positions.append(pos + offset)
         
         return black_key_positions
+    
+    def resizeEvent(self, event):
+        """Handle resizing to maintain static key positions."""
+        self.resize_piano()
+        super().resizeEvent(event)
+
+    def showEvent(self, event):
+        """Ensure proper layout when the widget is shown."""
+        self.resize_piano()
+        super().showEvent(event)
