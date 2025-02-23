@@ -1,7 +1,7 @@
 import json
 import time
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QGridLayout, QSizePolicy, QHBoxLayout, QComboBox, QPushButton, QHBoxLayout, QMessageBox, QSpacerItem, QLabel
-from PySide6.QtCore import QThread, Signal, QProcess
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QGridLayout, QSizePolicy, QHBoxLayout, QComboBox, QPushButton, QHBoxLayout, QMessageBox, QSpacerItem, QLabel
+from PySide6.QtCore import QThread
 from src.models.midi_detection import MidiDetection
 from src.widgets.piano_widget import PianoWidget
 from src.widgets.fader_widget import FaderWidget
@@ -308,17 +308,7 @@ class MainWindow(QMainWindow):
             
         else:
             print("Starting app")
-            print(f"selected {self.midi_devices_dropdown.currentText()}")
             # self.midi_thread = MidiListenerThread("Minilab3 MIDI 0")
             self.midi_thread = MidiListenerThread(self.midi_devices_dropdown.currentText())
             self.midi_thread.start()  # Calls run(), which calls run_scan()
             self.start_button.setText("Stop")  # Update button text
-    
-def main():
-    app = QApplication([])
-    window = MainWindow()
-    window.show()
-    app.exec()
-
-if __name__ == "__main__":
-    main()
