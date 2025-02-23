@@ -9,7 +9,11 @@ class Midi:
     action_type: MidiActionType
     midi_channel: int = 1
     midi_note: str = None
-    midi_value: str = field(default=None)
+    _midi_value: str = field(default=None)
+
+    @property
+    def midi_value(self):
+        return self._midi_value
 
     @midi_value.setter
     def midi_value(self, new_value):
