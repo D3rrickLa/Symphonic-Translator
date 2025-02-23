@@ -6,12 +6,11 @@ from keyboard import send
 
 class MidiDetection():
     def list_midi_devices(self):
-        print("Available MIDI Input Ports:")
+        # print("Available MIDI Input Ports:")
         devices = []
         try:
             for port in mido.get_input_names():
                 devices.append(port)
-            print(devices)
             return devices
         except Exception as e:
             pass 
