@@ -250,5 +250,10 @@ class SidePanel(QWidget):
 
     def reset_macro(self):
         """Define the reset macro logic here."""
-        pass
+        self.control_type_dropdown[0].setCurrentIndex(0)
+        self.action_dropdown[0].setCurrentIndex(0)
+        self.midi_channel_dropdown[0].setCurrentIndex(0) 
+        self.midi_note_edit_text.clear()                  
+        self.midi_value.clear()       
+        self.save_macro() 
     

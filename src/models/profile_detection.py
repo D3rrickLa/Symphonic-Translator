@@ -11,13 +11,9 @@ class ProfileDetection():
                 "file_path" : "None",
                 "program_window_name" : "default", # what gw uses to see what user is actively on
                 "KEY": {
-                    "69" : {"action": "1", "params": {"command": "start notepad"}},
-                    "70" : {"action": "1", "params": {"command": "start chrome"}}
+                    "69" : {"action": "1", "params": {"RUN_COMMAND": "start notepad"}},
+                    "70" : {"action": "1", "params": {"RUN_COMMAND": "start chrome"}}
                 },
-                "CONTROL_CHANGE": {
-                    "69" : {"action": "1", "params": {"command": "start notepad"}},
-                    "70" : {"action": "1", "params": {"command": "start chrome"}}
-                }
             }            
         }
         self._profile_default_name="profiles.json"
@@ -50,10 +46,15 @@ class ProfileDetection():
             json.dump(self.default_profile, file, indent=4)
             return self.default_profile
 
+    def get_active_app(self):
+        active_window = gw.getActiveWindow()
+        if active_window: return active_window.title.lower()
+        return None
+
     def get_profile(self, profiles):
-        active_application = gw.getActiveWindow()
-        for app, macros in profiles.items():
-            if app in active_application:
+        active_application = self.get_active_app()
+        for _, macros in profiles.items():
+            if macros.get("program_window_name") in active_application:
                 return macros
         return profiles["default"]
 
@@ -80,12 +81,6 @@ class ProfileDetection():
                     profile_data = json.load(file)
                 except json.JSONDecodeError:
                     print(f"JSON Decode Error: {file} is corrupted. Replacing with default profiles.")
-
-        # if midi.profile_name not in profile_data:
-        #     profile_data[midi.profile_name] = {}        
-        
-        # if midi.control_type.name not in profile_data[midi.profile_name]:
-        #     profile_data[midi.profile_name][midi.control_type.name] = {}
                 
         profile_data.setdefault(midi.profile_name, {}).setdefault(midi.control_type.name, {})
         action_type_str = str(midi.action_type.value).lower()
@@ -116,7 +111,7 @@ class ProfileDetection():
     def _get_action_type(self, action_type: MidiActionType):   
         match(action_type):
             case MidiActionType.RUN_COMMAND:
-                return "COMMAND"
+                return "RUN_COMMAND"
             case MidiActionType.KEYBOARD_SHORTCUT:
                 return "KEYBOARD_SHORTCUT"
             case MidiActionType.RUN_SCRIPT:
@@ -125,3 +120,7 @@ class ProfileDetection():
                 return "PRINT_MESSAGE"
             case _:
                 return "NONE"
+    
+    def run_app(self):
+        loaded_profiles = self.get_loaded_profiles()
+        return self.get_profile(loaded_profiles)

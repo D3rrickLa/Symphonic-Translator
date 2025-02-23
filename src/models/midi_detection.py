@@ -5,10 +5,17 @@ import subprocess
 from keyboard import send
 
 class MidiDetection():
-    def list_midi_devices():
+    def list_midi_devices(self):
         print("Available MIDI Input Ports:")
-        for port in mido.get_input_names():
-            print(port)
+        devices = []
+        try:
+            for port in mido.get_input_names():
+                devices.append(port)
+            print(devices)
+            return devices
+        except Exception as e:
+            pass 
+        return devices
     
     def execute_action(self, action_conf):
         if not action_conf or "action" not in action_conf:
@@ -53,7 +60,6 @@ class MidiDetection():
                     match msg.type:
                         case "note_on" if msg.velocity > 0:
                             action = active_profile["KEY"].get(str(msg.note))
-                            print(action)
                             self.execute_action(action)
                         
                             if(msg.note == 72):
@@ -68,4 +74,9 @@ class MidiDetection():
                             self.execute_action(action)
                         
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error on listening to midi: {e}")
+
+if __name__ == "__main__":
+    x = MidiDetection()
+    # selected_device = input("please enter the selected MIDI device:")
+    x.listen_to_midi("Minilab3 MIDI 0")
